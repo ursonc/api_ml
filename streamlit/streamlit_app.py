@@ -5,7 +5,7 @@ import numpy as np
 
 # Load the trained model pipeline
 try:
-    model_pipeline = joblib.load('apartments_xgb_model_log.joblib")
+    model_pipeline = joblib.load("apartments_xgb_model_log.joblib")
 except FileNotFoundError:
     st.error("Model file not found. Please ensure the model file is in the correct path.")
     st.stop()
