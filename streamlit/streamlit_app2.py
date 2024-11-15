@@ -34,7 +34,6 @@ def load_model_and_metrics(path):
         st.error(f"An error occurred while loading the model: {e}")
         st.stop()
 
-# Define the model path (ensure the path is correct relative to this script)
 model_path = "streamlit/apartments_xgb_model_log.joblib"
 
 # Load the model and metrics
@@ -104,7 +103,7 @@ st.markdown("""
 # ==============================
 # 4. App Title and Description
 # ==============================
-st.title("🏠 Apartment Price Prediction in Belgium")
+st.title("🏠 Appartment Price Prediction in Belgium")
 st.write(
     "Welcome to the Apartment Price Prediction app! Fill in the details below to get an estimate of your apartment's price."
 )
