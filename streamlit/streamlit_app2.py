@@ -7,7 +7,7 @@ import numpy as np
 # 1. Set Page Configuration
 # ==============================
 st.set_page_config(
-    page_title="🏠 Apartment Price Prediction in Belgium",
+    page_title="🏠 Appartment Price Prediction in Belgium",
     page_icon="🏠",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -140,7 +140,7 @@ def get_province_from_zip_code(zip_code):
         return "Luxembourg"
     elif 8000 <= zip_int <= 8999:
         return "West Flanders"
-    elif 9000 <= zip_int <= 9999:
+    elif 9000 <= zip_int <= 9992:
         return "East Flanders"
     else:
         return None  # ZIP code not recognized
