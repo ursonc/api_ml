@@ -10,7 +10,6 @@ except FileNotFoundError:
     st.error("Model file not found. Please ensure the model file is in the correct path.")
     st.stop()
 =======
-<<<<<<< HEAD
 # Set page configuration
 st.set_page_config(
     page_title="Apartment Price Prediction",
