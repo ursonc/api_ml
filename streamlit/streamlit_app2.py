@@ -105,7 +105,7 @@ st.markdown("""
 # ==============================
 st.title("🏠 Appartment Price Prediction in Belgium")
 st.write(
-    "Welcome to the Apartment Price Prediction app! Fill in the details below to get an estimate of your apartment's price."
+    "Welcome to the Appartment Price Prediction app! Fill in the details below to get an estimate of your appartments's price."
 )
 
 # Add a horizontal divider
@@ -156,7 +156,7 @@ with st.form(key='prediction_form'):
         zip_code = st.text_input(
             "📍 ZIP Code",
             "1000",
-            help="Enter the 4-digit Belgian ZIP Code of the apartment."
+            help="Enter the 4-digit Belgian ZIP Code of the appartment."
         )
         total_area_sqm = st.number_input(
             "📐 Total Area (sqm)",
@@ -164,7 +164,7 @@ with st.form(key='prediction_form'):
             max_value=500,
             value=75,
             step=1,
-            help="Enter the total area of the apartment in square meters."
+            help="Enter the total area of the appartment in square meters."
         )
         nbr_bedrooms = st.number_input(
             "🛏️ Number of Bedrooms",
@@ -190,7 +190,7 @@ with st.form(key='prediction_form'):
             max_value=2024,
             value=2000,
             step=1,
-            help="Enter the year the apartment was constructed."
+            help="Enter the year the appartment was constructed."
         )
         state_building = st.selectbox(
             "🏢 State of Building",
@@ -207,18 +207,18 @@ with st.form(key='prediction_form'):
             help="Select the type of heating available."
         )
         fl_furnished_input = st.radio(
-            "🛋️ Is the apartment furnished?",
+            "🛋️ Is the appartment furnished?",
             options=["Yes", "No"],
             index=1,
             horizontal=True,
-            help="Indicate whether the apartment is furnished."
+            help="Indicate whether the appartment is furnished."
         )
         fl_double_glazing_input = st.radio(
             "🌞 Has Double Glazing?",
             options=["Yes", "No"],
             index=0,
             horizontal=True,
-            help="Indicate whether the apartment has double glazing."
+            help="Indicate whether the appartment has double glazing."
         )
 
     # Center the submit button using custom CSS
@@ -274,7 +274,7 @@ if submit_button:
                 # Display prediction with formatting
                 st.success("🎉 **Prediction successful!**")
                 st.subheader("💰 Predicted Price")
-                st.write(f"The estimated price of the apartment is: **€{predicted_price:,.2f}**")
+                st.write(f"The estimated price of the appartment is: **€{predicted_price:,.2f}**")
 
                 # Add model performance metrics
                 st.markdown("### 📊 Model Performance Metrics")
@@ -302,7 +302,7 @@ if submit_button:
 st.markdown(
     """
     <div class="footer">
-        <p><strong>About this project:</strong> This app uses machine learning to predict apartment prices based on various features like area, location, and amenities. It is intended to help users estimate the value of properties in Belgium.</p>
+        <p><strong>About this project:</strong> This app uses machine learning to predict appartment prices based on various features like area, location, and amenities. It is intended to help users estimate the value of properties in Belgium.</p>
         <p>Developed by <a href="https://www.linkedin.com/in/ursoncallens" target="_blank">Urson Callens</a> | <a href="https://www.github.com/ursonc" target="_blank">GitHub</a></p>
     </div>
     """,
