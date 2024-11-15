@@ -302,7 +302,9 @@ if submit_button:
 st.markdown(
     """
     <div class="footer">
-        <p><strong>About this project:</strong> This app uses machine learning to predict appartment prices based on various features like area, location, and amenities. It is intended to help users estimate the value of properties in Belgium.</p>
+        <p><strong>About this project:</strong> This app uses machine learning to predict appartment prices based on various features like area, location, and amenities. 
+        It is intended to help users estimate the value of properties in Belgium. 
+        This app was made in the course of one week witin my AI & Data Science course at BeCode, Ghent. </p>
         <p>Developed by <a href="https://www.linkedin.com/in/ursoncallens" target="_blank">Urson Callens</a> | <a href="https://www.github.com/ursonc" target="_blank">GitHub</a></p>
     </div>
     """,
