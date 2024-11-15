@@ -22,7 +22,7 @@ def load_model_and_metrics(path):
         model_pipeline = joblib.load(path)
         # Model performance metrics
         model_metrics = {
-            "R_squared": 0.7078,   # R-squared 
+            "R_squared": 0.7303,   # R-squared 
             "MAE": 38692.80,       # Mean Absolute Error 
             "Median_AE": 25947.45, # Median Absolute Error 
         }
