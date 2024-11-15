@@ -3,7 +3,6 @@ import joblib
 import pandas as pd
 import numpy as np
 
-<<<<<<< HEAD
 # Load the trained model pipeline
 try:
     model_pipeline = joblib.load("apartments_xgb_model_log.joblib")
