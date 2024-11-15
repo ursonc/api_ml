@@ -3,164 +3,129 @@ import joblib
 import pandas as pd
 import numpy as np
 
-# Load the trained model pipeline
-try:
-    model_pipeline = joblib.load("apartments_xgb_model_log.joblib")
-except FileNotFoundError:
-    st.error("Model file not found. Please ensure the model file is in the correct path.")
-    st.stop()
-=======
-# Set page configuration
+# ==============================
+# 1. Set Page Configuration
+# ==============================
 st.set_page_config(
-    page_title="Apartment Price Prediction",
+    page_title="🏠 Apartment Price Prediction in Belgium",
     page_icon="🏠",
     layout="wide",
     initial_sidebar_state="expanded",
 )
-=======
-# Define the model path
-model_path = "streamlit/appartments_xgb_model_log.joblib"
->>>>>>> c86494f54c5d83b90b5b3011b7e11d64799ae109
 
-# Load the model with caching
-@st.cache_resource  # Cache the model loading to avoid reloading on each rerun
-def load_model(path):
+# ==============================
+# 2. Load the Trained Model and Metrics with Caching
+# ==============================
+@st.cache_resource
+def load_model_and_metrics(path):
     try:
-        model = joblib.load(path)
-        return model
-    except FileNotFoundError:
-        st.error(f"Model file not found at {path}. Please ensure the model file is in the correct path.")
-        st.stop()
-
-# Use the model
-model = load_model(model_path)
-
-
-# CSS to make the form more compact
-st.markdown("""
-    <style>
-        .css-1aumxhk { padding-top: 1rem; }
-        .css-1lsmgbg { padding-top: 1rem; padding-bottom: 1rem; }
-        .css-17lntkn {
-            font-size: 0.85rem;
-            padding: 5px 10px;
-        }
-        .css-1dq8tca, .css-12oz5g7 {
-            font-size: 0.85rem;
-            padding: 5px;
-        }
-        .css-1djdy6k {
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
-        }
-    </style>
-""", unsafe_allow_html=True)
->>>>>>> de17b805c9995f4548974f7d1e9446034825f690
-
-# Load the trained model pipeline and metrics
-@st.cache_data
-def load_model_and_metrics():
-    try:
-<<<<<<< HEAD
-        model_pipeline = joblib.load("apartments_xgb_model_log.joblib")
-        # Updated model performance metrics with your provided values
+        model_pipeline = joblib.load(path)
+        # Model performance metrics
         model_metrics = {
             "R_squared": 0.7078,   # R-squared 
             "MAE": 38692.80,       # Mean Absolute Error 
             "Median_AE": 25947.45, # Median Absolute Error 
-       
         }
         return model_pipeline, model_metrics
     except FileNotFoundError as e:
         st.error(f"File not found: {e}")
         st.stop()
     except Exception as e:
-        st.error(f"An error occurred: {e}")
+        st.error(f"An error occurred while loading the model: {e}")
         st.stop()
 
+# Define the model path (ensure the path is correct relative to this script)
+model_path = "apartments_xgb_model_log.joblib"
+
 # Load the model and metrics
-model_pipeline, model_metrics = load_model_and_metrics()
+model_pipeline, model_metrics = load_model_and_metrics(model_path)
 
-# Custom CSS for styling
-st.markdown(
-    """
+# ==============================
+# 3. Apply Custom CSS Styling
+# ==============================
+st.markdown("""
     <style>
-    /* Main layout */
-    .main {
-        background-color: #f7f7f7;
-    }
-    /* Header */
-    header, .st-bx {
-        background-color: #333333;
-        color: white;
-    }
-    /* Button styling */
-    .stButton>button {
-        background-color: #28a745;
-        color: white;
-        border: none;
-        padding: 0.5em 1em;
-        font-size: 1em;
-        border-radius: 0.25em;
-        cursor: pointer;
-    }
-    /* Button hover effect */
-    .stButton>button:hover {
-        background-color: #218838;
-    }
-    /* Footer styling */
-    .footer {
-        background-color: #333333;
-        color: white;
-        text-align: center;
-        padding: 1em 0;
-        margin-top: 2em;
-    }
-    .footer a {
-        color: #ffc107;
-        text-decoration: none;
-        font-weight: bold;
-    }
-    .footer a:hover {
-        color: #ffca2c;
-    }
-    /* Remove whitespace at the top */
-    .block-container {
-        padding-top: 1rem;
-    }
-    /* Input labels */
-    label {
-        font-weight: bold;
-    }
-    /* Center content */
-    .center {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+        /* Main layout */
+        .main {
+            background-color: #f7f7f7;
+        }
+        /* Header */
+        header, .st-bx {
+            background-color: #333333;
+            color: white;
+        }
+        /* Button styling */
+        .stButton>button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 0.5em 1em;
+            font-size: 1em;
+            border-radius: 0.25em;
+            cursor: pointer;
+        }
+        /* Button hover effect */
+        .stButton>button:hover {
+            background-color: #218838;
+        }
+        /* Footer styling */
+        .footer {
+            background-color: #333333;
+            color: white;
+            text-align: center;
+            padding: 1em 0;
+            margin-top: 2em;
+        }
+        .footer a {
+            color: #ffc107;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .footer a:hover {
+            color: #ffca2c;
+        }
+        /* Remove whitespace at the top */
+        .block-container {
+            padding-top: 1rem;
+        }
+        /* Input labels */
+        label {
+            font-weight: bold;
+        }
+        /* Center content */
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
-    """,
-    unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
-# Title and description
-st.title("🏠 Apartment Price Prediction")
+# ==============================
+# 4. App Title and Description
+# ==============================
+st.title("🏠 Apartment Price Prediction in Belgium")
 st.write(
     "Welcome to the Apartment Price Prediction app! Fill in the details below to get an estimate of your apartment's price."
 )
 
-# Add a divider
+# Add a horizontal divider
 st.markdown("---")
-=======
+
+# ==============================
+# 5. Define Helper Function to Map ZIP Code to Province
+# ==============================
+def get_province_from_zip_code(zip_code):
+    try:
         zip_int = int(zip_code)
     except ValueError:
-        return None
+        return None  # Invalid ZIP code format
 
     if 1000 <= zip_int <= 1299:
         return "Brussels Capital Region"
     elif 1300 <= zip_int <= 1499:
         return "Walloon Brabant"
-    elif (1500 <= zip_int <= 1999) or (3000 <= zip_int <= 3499):
+    elif 1500 <= zip_int <= 1999 or 3000 <= zip_int <= 3499:
         return "Flemish Brabant"
     elif 2000 <= zip_int <= 2999:
         return "Antwerp"
@@ -170,7 +135,7 @@ st.markdown("---")
         return "Liège"
     elif 5000 <= zip_int <= 5999:
         return "Namur"
-    elif (6000 <= zip_int <= 6599) or (7000 <= zip_int <= 7999):
+    elif 6000 <= zip_int <= 6599 or 7000 <= zip_int <= 7999:
         return "Hainaut"
     elif 6600 <= zip_int <= 6999:
         return "Luxembourg"
@@ -179,24 +144,20 @@ st.markdown("---")
     elif 9000 <= zip_int <= 9999:
         return "East Flanders"
     else:
-        return None
+        return None  # ZIP code not recognized
 
-# Title and description
-st.title("🏠 Apartment Price Prediction in Belgium")
-st.write("Predict the price of an apartment based on its features.")
->>>>>>> de17b805c9995f4548974f7d1e9446034825f690
-
-# Collect user input in a compact two-column layout
+# ==============================
+# 6. Collect User Input via Streamlit Form
+# ==============================
 with st.form(key='prediction_form'):
-<<<<<<< HEAD
-    # Organize inputs in columns
+    # Organize inputs in three columns for a compact layout
     col1, col2, col3 = st.columns([1, 1, 1])
 
     with col1:
         zip_code = st.text_input(
             "📍 ZIP Code",
             "1000",
-            help="Enter the ZIP Code of the apartment."
+            help="Enter the 4-digit Belgian ZIP Code of the apartment."
         )
         total_area_sqm = st.number_input(
             "📐 Total Area (sqm)",
@@ -235,107 +196,57 @@ with st.form(key='prediction_form'):
         state_building = st.selectbox(
             "🏢 State of Building",
             options=["NEW", "GOOD", "JUST RENOVATED", "TO RENOVATE", "TO RESTORE", "OTHER"],
-            index=1
+            index=1,
+            help="Select the current state of the building."
         )
 
     with col3:
         heating_type = st.selectbox(
             "🔥 Heating Type",
             options=["GAS", "ELECTRIC", "CENTRAL", "WOOD", "SOLAR", "OTHER"],
-            index=0
+            index=0,
+            help="Select the type of heating available."
         )
         fl_furnished_input = st.radio(
             "🛋️ Is the apartment furnished?",
             options=["Yes", "No"],
             index=1,
-            horizontal=True
+            horizontal=True,
+            help="Indicate whether the apartment is furnished."
         )
         fl_double_glazing_input = st.radio(
             "🌞 Has Double Glazing?",
             options=["Yes", "No"],
             index=0,
-            horizontal=True
+            horizontal=True,
+            help="Indicate whether the apartment has double glazing."
         )
 
-    # Center the submit button
+    # Center the submit button using custom CSS
     st.markdown("<div class='center'>", unsafe_allow_html=True)
     submit_button = st.form_submit_button(label='🔍 Predict Price')
     st.markdown("</div>", unsafe_allow_html=True)
-=======
-    col1, col2 = st.columns(2)
 
-    with col1:
-        total_area_sqm = st.number_input("**Total Area (sqm)**", min_value=10, max_value=500, value=75, step=1)
-        construction_year = st.number_input("**Construction Year**", min_value=1900, max_value=2024, value=2000, step=1)
-        nbr_bedrooms = st.number_input("**Number of Bedrooms**", min_value=0, max_value=6, value=2, step=1)
-        terrace_sqm = st.number_input("**Terrace Area (sqm)**", min_value=0, max_value=100, value=0, step=1)
->>>>>>> de17b805c9995f4548974f7d1e9446034825f690
-
-    with col2:
-        state_building = st.selectbox("**State of the Building**", ["NEW", "GOOD", "TO RENOVATE", "JUST RENOVATED", "TO RESTORE", "OTHER"], index=1)
-        zip_code = st.text_input("**ZIP Code**", "9000")
-        heating_type = st.selectbox("**Heating Type**", ["GAS", "ELECTRIC", "CENTRAL", "WOOD", "SOLAR", "OTHER"], index=0)
-        fl_furnished_input = st.radio("**Is Furnished?**", ["Yes", "No"], index=1, horizontal=True)
-        fl_double_glazing_input = st.radio("**Double Glazing?**", ["Yes", "No"], index=0, horizontal=True)
-
-    submit_button = st.form_submit_button(label='🚀 Predict')
-
-# Process submission
+# ==============================
+# 7. Process Form Submission and Make Predictions
+# ==============================
 if submit_button:
     # Validate ZIP code input
     zip_code = zip_code.strip()
     if not (zip_code.isdigit() and len(zip_code) == 4):
-        st.error("Please enter a valid 4-digit Belgian ZIP Code.")
+        st.error("❌ Please enter a valid 4-digit Belgian ZIP Code.")
     else:
-        # Function to determine province from zip code
-        def get_province_from_zip_code(zip_code):
-            try:
-                zip_int = int(zip_code)
-            except ValueError:
-                return None  # Invalid zip code format
-
-            if 1000 <= zip_int <= 1299:
-                return "Brussels Capital Region"
-            elif 1300 <= zip_int <= 1499:
-                return "Walloon Brabant"
-            elif (1500 <= zip_int <= 1999) or (3000 <= zip_int <= 3499):
-                return "Flemish Brabant"
-            elif 2000 <= zip_int <= 2999:
-                return "Antwerp"
-            elif 3500 <= zip_int <= 3999:
-                return "Limburg"
-            elif 4000 <= zip_int <= 4999:
-                return "Liège"
-            elif 5000 <= zip_int <= 5999:
-                return "Namur"
-            elif (6000 <= zip_int <= 6599) or (7000 <= zip_int <= 7999):
-                return "Hainaut"
-            elif 6600 <= zip_int <= 6999:
-                return "Luxembourg"
-            elif 8000 <= zip_int <= 8999:
-                return "West Flanders"
-            elif 9000 <= zip_int <= 9999:
-                return "East Flanders"
-            else:
-                return None  # Zip code not recognized
-
+        # Determine province based on ZIP code
         province = get_province_from_zip_code(zip_code)
         if province is None:
-            st.error("ZIP Code not recognized. Please enter a valid Belgian ZIP Code.")
+            st.error("❌ ZIP Code not recognized. Please enter a valid Belgian ZIP Code.")
         else:
-<<<<<<< HEAD
-            # Determine fl_terrace based on terrace_sqm
-            fl_terrace = 1 if terrace_sqm > 0 else 0
-
-            # Map "Yes"/"No" to 1/0 for fl_furnished and fl_double_glazing
-=======
-            st.success(f"**Province determined from ZIP Code**: {province}")
-
-            # Prepare binary flags and input data for prediction
-            fl_terrace = 1 if int(terrace_sqm) > 0 else 0
->>>>>>> de17b805c9995f4548974f7d1e9446034825f690
+            # Map "Yes"/"No" to 1/0 for binary features
             fl_furnished = 1 if fl_furnished_input == "Yes" else 0
             fl_double_glazing = 1 if fl_double_glazing_input == "Yes" else 0
+
+            # Determine if there's a terrace based on terrace_sqm
+            fl_terrace = 1 if terrace_sqm > 0 else 0
 
             # Prepare the input data dictionary
             data = {
@@ -357,9 +268,8 @@ if submit_button:
 
             # Make prediction and convert back from log scale to EUR
             try:
-<<<<<<< HEAD
                 # Make prediction using the loaded pipeline
-                pred_log = model_pipeline.predict(input_data)
+                pred_log = model_pipeline.predict(input_df)
                 predicted_price = np.expm1(pred_log)[0]  # Apply expm1 to get the original price
 
                 # Display prediction with formatting
@@ -384,22 +294,18 @@ if submit_button:
                     tasks involving structured data.
                 """)
             except Exception as e:
-                st.error(f"Prediction failed: {e}")
+                st.error(f"❌ Prediction failed: {e}")
                 st.write("Please check the input values and try again.")
 
-# Footer
+# ==============================
+# 8. Add Footer with Project Information
+# ==============================
 st.markdown(
     """
     <div class="footer">
         <p><strong>About this project:</strong> This app uses machine learning to predict apartment prices based on various features like area, location, and amenities. It is intended to help users estimate the value of properties in Belgium.</p>
-        <p>Developed by <a href="https://www.linkedin.com/in/ursoncallens" target="_blank">Urson Callens</a> | <a href="www.github.com/ursonc" target="_blank">GitHub</a></p>
+        <p>Developed by <a href="https://www.linkedin.com/in/ursoncallens" target="_blank">Urson Callens</a> | <a href="https://www.github.com/ursonc" target="_blank">GitHub</a></p>
     </div>
     """,
     unsafe_allow_html=True
 )
-=======
-                log_prediction = model_pipeline.predict(input_df)  # Prediction in log scale
-                prediction = np.exp(log_prediction)  # Convert back to EUR scale
-                st.success(f"💸 **Predicted Apartment Price**: €{prediction[0]:,.2f}")
-            except Exception as e:
-                st.error(f"An error occurred during prediction: {e}")
