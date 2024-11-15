@@ -4,14 +4,11 @@ import pandas as pd
 import numpy as np
 
 # Load the trained model pipeline
-import joblib
-
-# Load the original model pipeline (in compatible scikit-learn environment)
-model_pipeline = joblib.load('apartments_xgb_model_log.joblib')
-
-# Re-save the model to make it compatible with the current environment
-joblib.dump(model_pipeline, 'new_apartments_xgb_model_log.joblib')
-
+try:
+    model_pipeline = joblib.load(r"C:\Users\Becode-son\Desktop\API-ML\streamlit\apartments_xgb_model_log.joblib")
+except FileNotFoundError:
+    st.error("Model file not found. Please ensure the model file is in the correct path.")
+    st.stop()
 
 # Function to determine province from zip code
 def get_province_from_zip_code(zip_code):
