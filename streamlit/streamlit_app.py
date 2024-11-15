@@ -6,7 +6,7 @@ import numpy as np
 <<<<<<< HEAD
 # Load the trained model pipeline
 try:
-    model_pipeline = joblib.load(r"C:\Users\Becode-son\Desktop\API-ML\streamlit\apartments_xgb_model_log.joblib")
+    model_pipeline = joblib.load("apartments_xgb_model_log.joblib")
 except FileNotFoundError:
     st.error("Model file not found. Please ensure the model file is in the correct path.")
     st.stop()
