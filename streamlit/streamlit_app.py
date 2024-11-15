@@ -35,7 +35,7 @@ def load_model_and_metrics(path):
         st.stop()
 
 # Define the model path (ensure the path is correct relative to this script)
-model_path = "apartments_xgb_model_log.joblib"
+model_path = "streamlit/appartments_xgb_model_log.joblib"
 
 # Load the model and metrics
 model_pipeline, model_metrics = load_model_and_metrics(model_path)
