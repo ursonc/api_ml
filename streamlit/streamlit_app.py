@@ -2,6 +2,7 @@ import streamlit as st
 import joblib
 import pandas as pd
 import numpy as np
+import json
 
 # ==============================
 # 1. Set Page Configuration
@@ -43,37 +44,36 @@ def load_models_and_metrics():
 models = load_models_and_metrics()
 
 # ==============================
-# 3. Helper Function: ZIP Code to Province
+# 3. Load ZIP Code Reference Data
 # ==============================
-def get_province_from_zip(zip_code):
+@st.cache_data
+def load_zip_code_reference():
     """
-    Map ZIP code to the corresponding province and region.
+    Load reference data containing latitude, longitude, and city names for each ZIP code from JSON.
     """
     try:
-        zip_code = int(zip_code)
-    except ValueError:
-        return None, None
+        with open("streamlit/zipcode-belgium.json", "r") as f:
+            zip_code_data = json.load(f)
+        return {entry["zip"]: {"city": entry["city"], "latitude": entry["lat"], "longitude": entry["lng"]} for entry in zip_code_data}
+    except FileNotFoundError as e:
+        st.error(f"ZIP code reference file not found: {e}")
+        st.stop()
+    except Exception as e:
+        st.error(f"Error loading ZIP code reference data: {e}")
+        st.stop()
 
-    zip_to_province_region = {
-        range(1000, 1300): ("Brussels Capital Region", "Brussels"),
-        range(1300, 1500): ("Walloon Brabant", "Wallonia"),
-        range(1500, 2000): ("Flemish Brabant", "Flanders"),
-        range(2000, 3000): ("Antwerp", "Flanders"),
-        range(3000, 3500): ("Flemish Brabant", "Flanders"),
-        range(3500, 4000): ("Limburg", "Flanders"),
-        range(4000, 5000): ("Liège", "Wallonia"),
-        range(5000, 6000): ("Namur", "Wallonia"),
-        range(6000, 6600): ("Hainaut", "Wallonia"),
-        range(6600, 7000): ("Luxembourg", "Wallonia"),
-        range(7000, 8000): ("Hainaut", "Wallonia"),
-        range(8000, 9000): ("West Flanders", "Flanders"),
-        range(9000, 9993): ("East Flanders", "Flanders"),
-    }
 
-    for zip_range, (province, region) in zip_to_province_region.items():
-        if zip_code in zip_range:
-            return province, region
-    return None, None
+zip_code_mapping = load_zip_code_reference()
+
+def get_zip_code_details(zip_code):
+    """
+    Retrieve city name, latitude, and longitude for a given ZIP code.
+    """
+    zip_code = str(zip_code)
+    if zip_code in zip_code_mapping:
+        details = zip_code_mapping[zip_code]
+        return details["city"], details["latitude"], details["longitude"]
+    return "Unknown", 0, 0  # Default values for missing zip_code
 
 
 # ==============================
@@ -88,6 +88,12 @@ with st.form("prediction_form"):
     nbr_bedrooms = st.number_input("🛏️ Number of Bedrooms", min_value=0, max_value=10, value=2, step=1)
     construction_year = st.number_input("🏗️ Construction Year", min_value=1900, max_value=2024, value=2000, step=1)
     state_building = st.selectbox("🏢 State of Building", ["NEW", "GOOD", "JUST RENOVATED", "TO RENOVATE", "TO RESTORE", "OTHER"])
+    heating_type = st.selectbox(
+        "🔥 Heating Type",
+        options=["GAS", "ELECTRIC", "WOOD", "SOLAR", "CENTRAL", "OTHER"],
+        index=0,
+        help="Select the type of heating available for the property."
+    )
 
     # Dynamically adjust inputs based on property type
     if property_type == "Apartment":
@@ -104,19 +110,22 @@ with st.form("prediction_form"):
 # ==============================
 if submit_button:
     zip_code = zip_code.strip()
-    province, region = get_province_from_zip(zip_code)
+    city_name, latitude, longitude = get_zip_code_details(zip_code)
 
-    if not province:
+    if city_name == "Unknown":
         st.error("❌ Invalid ZIP Code. Please enter a valid 4-digit Belgian ZIP Code.")
     else:
+        # Prepare input data dynamically with city_name, latitude, and longitude
         input_data = {
             "total_area_sqm": total_area_sqm,
             "construction_year": construction_year,
             "nbr_bedrooms": nbr_bedrooms,
             "state_building": state_building.upper(),
             "zip_code": zip_code,
-            "province": province.upper(),
-            "region": region.upper(),
+            "city_name": city_name,
+            "latitude": latitude,
+            "longitude": longitude,
+            "heating_type": heating_type.upper(),
         }
 
         if property_type == "Apartment":
@@ -126,7 +135,12 @@ if submit_button:
                 "fl_double_glazing": 1 if fl_double_glazing == "Yes" else 0,
             })
         else:
-            input_data["garden_sqm"] = garden_sqm
+            input_data.update({
+                "garden_sqm": garden_sqm,
+                "terrace_sqm": 0,  # Default value for houses
+                "fl_furnished": 0,  # Default value
+                "fl_double_glazing": 0,  # Default value
+            })
 
         model, metrics = models[property_type]
         input_df = pd.DataFrame([input_data])
@@ -138,6 +152,7 @@ if submit_button:
 
             st.success(f"🎉 Predicted Price: **€{predicted_price:,.2f}**")
             st.write(f"**Model Performance:** R² = {metrics['R_squared']:.4f}, MAE = €{metrics['MAE']:,.2f}")
+            st.write(f"**City Name:** {city_name}")
         except Exception as e:
             st.error(f"❌ Prediction failed: {e}")
 
