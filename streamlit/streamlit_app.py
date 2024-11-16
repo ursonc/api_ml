@@ -19,6 +19,9 @@ st.set_page_config(
 # ==============================
 @st.cache_resource
 def load_models_and_metrics():
+    """
+    Load trained models and metrics for both apartments and houses.
+    """
     try:
         apartment_model = joblib.load("streamlit/apartments_xgb_model_log.joblib")
         house_model = joblib.load("streamlit/price_prediction_pipeline.joblib")
@@ -27,8 +30,8 @@ def load_models_and_metrics():
         house_metrics = {"R_squared": 0.7352, "MAE": 45213.67, "Median_AE": 31548.32}
 
         return {
-            "Apartment": (apartment_model, apartment_metrics),
-            "House": (house_model, house_metrics),
+            "Apartment": (apartment_model, apartment_metrics, True),  # Log-transformed predictions
+            "House": (house_model, house_metrics, False),  # No log transformation
         }
     except FileNotFoundError as e:
         st.error(f"Model file not found: {e}")
@@ -192,6 +195,7 @@ if submit_button:
     if city_name == "Unknown":
         st.error("❌ Invalid ZIP Code. Please enter a valid 4-digit Belgian ZIP Code.")
     else:
+        # Prepare input data
         fl_terrace = 1 if property_type == "Apartment" and terrace_sqm > 0 else 0
         input_data = {
             "zip_code": zip_code,
@@ -204,7 +208,7 @@ if submit_button:
             "longitude": longitude,
             "city_name": city_name,
             "province": province,
-            "fl_floodzone": 0,  # Default value
+            "fl_floodzone": 0,
             "terrace_sqm": terrace_sqm if property_type == "Apartment" else 0,
             "garden_sqm": garden_sqm if property_type == "House" else 0,
             "fl_furnished": 1 if property_type == "Apartment" and fl_furnished == "Yes" else 0,
@@ -212,13 +216,24 @@ if submit_button:
             "fl_terrace": fl_terrace
         }
 
-        model, metrics = models[property_type]
+        # Convert input data to DataFrame
         input_df = pd.DataFrame([input_data])
 
         try:
-            pred_log = model.predict(input_df)
-            predicted_price = np.expm1(pred_log)[0]
-            st.success(f"🎉 Predicted Price: **€{predicted_price:,.2f}**")
+            # Load the appropriate model and its metadata
+            model, metrics, is_log_transformed = models[property_type]
+
+            # Make prediction
+            pred_price = model.predict(input_df)
+
+            # Apply inverse log transformation if needed
+            if is_log_transformed:
+                pred_price = np.expm1(pred_price[0])
+            else:
+                pred_price = pred_price[0]
+
+            # Display results
+            st.success(f"🎉 Predicted Price: **€{pred_price:,.2f}**")
             st.write(f"**City Name:** {city_name}")
             st.write(f"**Province:** {province}")
             st.write(f"**Model Performance:** R² = {metrics['R_squared']:.4f}, MAE = €{metrics['MAE']:,.2f}")
@@ -230,7 +245,7 @@ if submit_button:
 # ==============================
 st.markdown("""
     <div class="footer">
-        <p><strong>About this project:</strong> Predict property prices in Belgium using machine learning. This app helps estimate apartment and house values based on various factors like ZIP code, area, and amenities.</p>
+        <p><strong>About this project:</strong> Predict property prices in Belgium using machine learning. This app helps estimate apartment and house values based on ZIP code, area, and amenities.</p>
         <p>Developed by <a href="https://www.linkedin.com/in/ursoncallens" target="_blank">Urson Callens</a>.</p>
     </div>
 """, unsafe_allow_html=True)
