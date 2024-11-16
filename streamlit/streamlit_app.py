@@ -75,6 +75,17 @@ def get_zip_code_details(zip_code):
         return details["city"], details["latitude"], details["longitude"]
     return "Unknown", 0, 0  # Default values for missing zip_code
 
+def get_province_from_zip(zip_code):
+    """
+    Map ZIP code to the corresponding province.
+    """
+    # Add mapping logic based on your ZIP code to province data
+    province_mapping = {
+        "1000": "Brussels Capital Region",
+        # Add more mappings as needed
+    }
+    return province_mapping.get(zip_code, "Unknown")
+
 
 # ==============================
 # 4. User Input Form
@@ -111,6 +122,7 @@ with st.form("prediction_form"):
 if submit_button:
     zip_code = zip_code.strip()
     city_name, latitude, longitude = get_zip_code_details(zip_code)
+    province = get_province_from_zip(zip_code)
 
     if city_name == "Unknown":
         st.error("❌ Invalid ZIP Code. Please enter a valid 4-digit Belgian ZIP Code.")
@@ -126,20 +138,24 @@ if submit_button:
             "latitude": latitude,
             "longitude": longitude,
             "heating_type": heating_type.upper(),
+            "province": province,
+            "fl_floodzone": 0,  # Default value
         }
 
+        # Add terrace and garden-related features
         if property_type == "Apartment":
+            fl_terrace = 1 if terrace_sqm > 0 else 0
             input_data.update({
                 "terrace_sqm": terrace_sqm,
                 "fl_furnished": 1 if fl_furnished == "Yes" else 0,
                 "fl_double_glazing": 1 if fl_double_glazing == "Yes" else 0,
+                "fl_terrace": fl_terrace,
             })
         else:
+            fl_terrace = 0
             input_data.update({
                 "garden_sqm": garden_sqm,
-                "terrace_sqm": 0,  # Default value for houses
-                "fl_furnished": 0,  # Default value
-                "fl_double_glazing": 0,  # Default value
+                "fl_terrace": fl_terrace,
             })
 
         model, metrics = models[property_type]
@@ -159,9 +175,17 @@ if submit_button:
 # ==============================
 # 6. Footer
 # ==============================
-st.markdown("""
-    <div style="text-align: center; margin-top: 50px;">
-        <p><strong>About this project:</strong> Predict property prices in Belgium using machine learning. Developed for educational purposes at <strong>BeCode</strong>.</p>
-        <p>Developed by <a href="https://www.linkedin.com/in/ursoncallens" target="_blank">Urson Callens</a>.</p>
+# ==============================
+# 8. Add Footer with Project Information
+# ==============================
+st.markdown(
+    """
+    <div class="footer">
+        <p><strong>About this project:</strong> This app uses machine learning to predict property prices based on various features like area, location, and amenities. 
+        It is intended to help users estimate the value of houses and appartments in Belgium. 
+        This app was made in the course of one week within my AI & Data Science course at BeCode, Ghent. </p>
+        <p>Developed by <a href="https://www.linkedin.com/in/ursoncallens" target="_blank">Urson Callens</a> | <a href="https://www.github.com/ursonc" target="_blank">GitHub</a></p>
     </div>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True
+)
