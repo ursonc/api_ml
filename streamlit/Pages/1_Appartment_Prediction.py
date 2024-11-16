@@ -2,6 +2,7 @@ import streamlit as st
 import joblib
 import pandas as pd
 import numpy as np
+import os
 
 # ==============================
 # 1. Set Page Configuration
@@ -34,7 +35,10 @@ def load_model_and_metrics(path):
         st.error(f"An error occurred while loading the model: {e}")
         st.stop()
 
-model_path = "streamlit/apartments_xgb_model_log.joblib"
+model_path = "streamlit/Pages/Trained_Models/apartments_xgb_model_log.joblib"
+# Determine the absolute path to the model file
+current_dir = os.path.dirname(__file__)
+model_path = os.path.join(current_dir, "Trained_Models", "apartments_xgb_model_log.joblib")
 
 # Load the model and metrics
 model_pipeline, model_metrics = load_model_and_metrics(model_path)

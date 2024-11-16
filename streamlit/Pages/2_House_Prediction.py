@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import joblib
 import json
+import os
 
 # ==============================
 # 1. Set Page Configuration
@@ -18,26 +19,25 @@ st.set_page_config(
 # 2. Load the Trained Model and Metrics
 # ==============================
 @st.cache_resource
-def load_models_and_metrics():
-    """
-    Load trained models and metrics for both apartments and houses.
-    """
+def load_model_and_metrics(path):
+    if not os.path.exists(path):
+        st.error(f"❌ Model file not found at: {path}")
+        st.stop()
     try:
         model_pipeline = joblib.load(path)
+        # Model performance metrics (hardcoded for now)
         model_metrics = {
-            "R_squared": 0.7352,  # R-squared
-            "MAE": 45213.67,      # Mean Absolute Error
-            "Median_AE": 31548.32 # Median Absolute Error
+            "R_squared": 0.7352,
+            "MAE": 45213.67,
+            "Median_AE": 31548.32,
         }
         return model_pipeline, model_metrics
-    except FileNotFoundError as e:
-        st.error(f"Model file not found: {e}")
-        st.stop()
     except Exception as e:
-        st.error(f"Error loading model: {e}")
+        st.error(f"❌ An error occurred while loading the model: {e}")
         st.stop()
 
-model_path = "streamlit/price_prediction_pipeline.joblib"
+current_dir = os.path.dirname(__file__)
+model_path = os.path.join(current_dir, "Trained_Models", "price_prediction_pipeline.joblib")
 model_pipeline, model_metrics = load_model_and_metrics(model_path)
 
 # ==============================
@@ -46,14 +46,15 @@ model_pipeline, model_metrics = load_model_and_metrics(model_path)
 @st.cache_data
 def load_zip_code_reference():
     try:
-        with open("streamlit/zipcode-belgium.json", "r") as f:
+        current_dir = os.path.abspath(os.path.dirname(__file__))
+        zip_file_path = os.path.join(current_dir, "Trained_Models", "zipcode-belgium.json")
+        if not os.path.exists(zip_file_path):
+            raise FileNotFoundError(f"ZIP code file not found at: {zip_file_path}")
+        with open(zip_file_path, "r") as f:
             zip_code_data = json.load(f)
         return {entry["zip"]: entry for entry in zip_code_data}
-    except FileNotFoundError as e:
-        st.error(f"ZIP code reference file not found: {e}")
-        st.stop()
     except Exception as e:
-        st.error(f"Error loading ZIP code reference data: {e}")
+        st.error(f"❌ Error loading ZIP code reference data: {e}")
         st.stop()
 
 zip_code_mapping = load_zip_code_reference()
@@ -67,7 +68,6 @@ def get_province_from_zip(zip_code):
         zip_int = int(zip_code)
     except ValueError:
         return "Unknown"
-
     if 1000 <= zip_int <= 1299:
         return "Brussels Capital Region"
     elif 1300 <= zip_int <= 1499:
@@ -96,9 +96,9 @@ def get_province_from_zip(zip_code):
 # ==============================
 # 4. User Input Form
 # ==============================
-st.title("🏠 House Price Prediction")
+st.title("🏠 House Price Prediction in Belgium")
 st.write(
-    "Welcome! Fill in the details below to get an estimate of your house's price."
+    "Welcome to the House Price Prediction page! Fill in the details below to get an estimated price for your house."
 )
 
 with st.form(key="prediction_form"):
@@ -167,6 +167,7 @@ if submit_button:
     else:
         input_data = {
             "zip_code": zip_code,
+            "province": province,
             "total_area_sqm": total_area_sqm,
             "nbr_bedrooms": nbr_bedrooms,
             "construction_year": construction_year,
@@ -175,38 +176,43 @@ if submit_button:
             "longitude": longitude,
             "garden_sqm": garden_sqm,
             "heating_type": heating_type.upper(),
-            "province": province,
-            "fl_floodzone": 0  # Default value
+            "terrace_sqm": 0,
+            "fl_terrace": 0,
+            "fl_floodzone": 0,
         }
 
         input_df = pd.DataFrame([input_data])
+
         try:
-            # Load the appropriate model and its metadata
-            model, metrics, is_log_transformed = models[property_type]
+            pred_price = model_pipeline.predict(input_df)
 
-            # Make prediction
-            pred_price = model.predict(input_df)
+            st.success("🎉 Prediction successful!")
+            st.subheader("💰 Predicted Price")
+            st.write(f"The estimated price is: **€{pred_price[0]:,.2f}**")
 
-            # Apply inverse log transformation if needed
-            if is_log_transformed:
-                pred_price = np.expm1(pred_price[0])
-            else:
-                pred_price = pred_price[0]
+            st.markdown("### 🌍 Property Location")
+            st.write(f"- **City:** {city_name}")
+            st.write(f"- **Province:** {province}")
 
-            # Display results
-            st.success(f"🎉 Predicted Price: **€{pred_price:,.2f}**")
-            st.write(f"**City Name:** {city_name}")
-            st.write(f"**Province:** {province}")
-            st.write(f"**Model Performance:** R² = {model_metrics['R_squared']:.4f}, MAE = €{model_metrics['MAE']:,.2f}")
+            st.markdown("### 📊 Model Metrics")
+            st.write(f"- **R²:** {model_metrics['R_squared']:.4f}")
+            st.write(f"- **Mean Absolute Error (MAE):** €{model_metrics['MAE']:,.2f}")
+            st.write(f"- **Median Absolute Error (Median AE):** €{model_metrics['Median_AE']:,.2f}")
+
         except Exception as e:
             st.error(f"❌ Prediction failed: {e}")
 
 # ==============================
-# 6. Add Footer
+# 6. Add Footer with Project Information
 # ==============================
-st.markdown("""
+st.markdown(
+    """
     <div class="footer">
-        <p><strong>About this project:</strong> Predict property prices in Belgium using machine learning. This app helps estimate house values based on ZIP code, area, and amenities.</p>
-        <p>Developed by <a href="https://www.linkedin.com/in/ursoncallens" target="_blank">Urson Callens</a>.</p>
+        <p><strong>About this project:</strong> This app uses machine learning to predict house prices based on various features like area, location, and amenities. 
+        It is intended to help users estimate the value of properties in Belgium. 
+        This app was made in the course of one week within my AI & Data Science course at BeCode, Ghent. </p>
+        <p>Developed by <a href="https://www.linkedin.com/in/ursoncallens" target="_blank">Urson Callens</a> | <a href="https://www.github.com/ursonc" target="_blank">GitHub</a></p>
     </div>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True
+)
