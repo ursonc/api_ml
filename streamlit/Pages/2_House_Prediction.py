@@ -18,7 +18,10 @@ st.set_page_config(
 # 2. Load the Trained Model and Metrics
 # ==============================
 @st.cache_resource
-def load_model_and_metrics(path):
+def load_models_and_metrics():
+    """
+    Load trained models and metrics for both apartments and houses.
+    """
     try:
         model_pipeline = joblib.load(path)
         model_metrics = {
@@ -178,8 +181,20 @@ if submit_button:
 
         input_df = pd.DataFrame([input_data])
         try:
-            predicted_price = model_pipeline.predict(input_df)[0]
-            st.success(f"🎉 Predicted Price: **€{predicted_price:,.2f}**")
+            # Load the appropriate model and its metadata
+            model, metrics, is_log_transformed = models[property_type]
+
+            # Make prediction
+            pred_price = model.predict(input_df)
+
+            # Apply inverse log transformation if needed
+            if is_log_transformed:
+                pred_price = np.expm1(pred_price[0])
+            else:
+                pred_price = pred_price[0]
+
+            # Display results
+            st.success(f"🎉 Predicted Price: **€{pred_price:,.2f}**")
             st.write(f"**City Name:** {city_name}")
             st.write(f"**Province:** {province}")
             st.write(f"**Model Performance:** R² = {model_metrics['R_squared']:.4f}, MAE = €{model_metrics['MAE']:,.2f}")
