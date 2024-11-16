@@ -72,61 +72,42 @@ def get_zip_code_details(zip_code):
         return details["city"], details["latitude"], details["longitude"]
     return "Unknown", 0, 0  # Default values for missing zip_code
 
-# ==============================
-# 4. Apply Custom CSS Styling
-# ==============================
-st.markdown("""
-    <style>
-        .main {
-            background-color: #f7f7f7;
-        }
-        header, .st-bx {
-            background-color: #333333;
-            color: white;
-        }
-        .stButton>button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 0.5em 1em;
-            font-size: 1em;
-            border-radius: 0.25em;
-            cursor: pointer;
-        }
-        .stButton>button:hover {
-            background-color: #218838;
-        }
-        .footer {
-            background-color: #333333;
-            color: white;
-            text-align: center;
-            padding: 1em 0;
-            margin-top: 2em;
-        }
-        .footer a {
-            color: #ffc107;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .footer a:hover {
-            color: #ffca2c;
-        }
-        .block-container {
-            padding-top: 1rem;
-        }
-        label {
-            font-weight: bold;
-        }
-        .center {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-    </style>
-""", unsafe_allow_html=True)
+def get_province_from_zip(zip_code):
+    """
+    Map ZIP code to the corresponding province.
+    """
+    try:
+        zip_int = int(zip_code)
+    except ValueError:
+        return "Unknown"  # Default for invalid ZIP code format
+
+    if 1000 <= zip_int <= 1299:
+        return "Brussels Capital Region"
+    elif 1300 <= zip_int <= 1499:
+        return "Walloon Brabant"
+    elif 1500 <= zip_int <= 1999 or 3000 <= zip_int <= 3499:
+        return "Flemish Brabant"
+    elif 2000 <= zip_int <= 2999:
+        return "Antwerp"
+    elif 3500 <= zip_int <= 3999:
+        return "Limburg"
+    elif 4000 <= zip_int <= 4999:
+        return "Liège"
+    elif 5000 <= zip_int <= 5999:
+        return "Namur"
+    elif 6000 <= zip_int <= 6599 or 7000 <= zip_int <= 7999:
+        return "Hainaut"
+    elif 6600 <= zip_int <= 6999:
+        return "Luxembourg"
+    elif 8000 <= zip_int <= 8999:
+        return "West Flanders"
+    elif 9000 <= zip_int <= 9992:
+        return "East Flanders"
+    else:
+        return "Unknown"  # Default for unrecognized ZIP codes
 
 # ==============================
-# 5. Collect User Input via Streamlit Form
+# 4. User Input Form
 # ==============================
 st.title("🏠 Property Price Prediction in Belgium")
 st.write(
@@ -135,7 +116,6 @@ st.write(
 
 property_type = st.selectbox("Choose Property Type", ["Apartment", "House"])
 
-# Organize the layout into clear sections
 with st.form(key='prediction_form'):
     st.markdown("### Property Information")
     col1, col2, col3 = st.columns([1, 1, 1])
@@ -199,16 +179,15 @@ with st.form(key='prediction_form'):
             fl_furnished = st.radio("🛋️ Furnished?", ["Yes", "No"], index=1, horizontal=True)
             fl_double_glazing = st.radio("🌞 Double Glazing?", ["Yes", "No"], index=0, horizontal=True)
 
-    st.markdown("---")
-
     submit_button = st.form_submit_button(label="🔍 Predict Price")
 
 # ==============================
-# 6. Process Submission and Make Predictions
+# 5. Process Submission and Make Predictions
 # ==============================
 if submit_button:
     zip_code = zip_code.strip()
     city_name, latitude, longitude = get_zip_code_details(zip_code)
+    province = get_province_from_zip(zip_code)
 
     if city_name == "Unknown":
         st.error("❌ Invalid ZIP Code. Please enter a valid 4-digit Belgian ZIP Code.")
@@ -224,6 +203,8 @@ if submit_button:
             "latitude": latitude,
             "longitude": longitude,
             "city_name": city_name,
+            "province": province,
+            "fl_floodzone": 0,  # Default value
             "terrace_sqm": terrace_sqm if property_type == "Apartment" else 0,
             "garden_sqm": garden_sqm if property_type == "House" else 0,
             "fl_furnished": 1 if property_type == "Apartment" and fl_furnished == "Yes" else 0,
@@ -239,16 +220,17 @@ if submit_button:
             predicted_price = np.expm1(pred_log)[0]
             st.success(f"🎉 Predicted Price: **€{predicted_price:,.2f}**")
             st.write(f"**City Name:** {city_name}")
+            st.write(f"**Province:** {province}")
             st.write(f"**Model Performance:** R² = {metrics['R_squared']:.4f}, MAE = €{metrics['MAE']:,.2f}")
         except Exception as e:
             st.error(f"❌ Prediction failed: {e}")
 
 # ==============================
-# 7. Footer
+# 6. Add Footer
 # ==============================
 st.markdown("""
     <div class="footer">
-        <p><strong>About this project:</strong> Predict property prices in Belgium using machine learning. Developed at <strong>BeCode</strong>.</p>
+        <p><strong>About this project:</strong> Predict property prices in Belgium using machine learning. This app helps estimate apartment and house values based on various factors like ZIP code, area, and amenities.</p>
         <p>Developed by <a href="https://www.linkedin.com/in/ursoncallens" target="_blank">Urson Callens</a>.</p>
     </div>
 """, unsafe_allow_html=True)
