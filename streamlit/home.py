@@ -10,48 +10,53 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ==============================
-# 2. App Title and Description
-# ==============================
-st.title("🏠 Price Prediction for Houses and Appartments in Belgium")
-st.markdown(
-    """
-    Welcome to the **Price Prediction App**!  
-    This app uses advanced **Machine Learning Models** to predict property prices for:
-    - **Appartments**
-    - **Houses**
+from pages import appartment_prediction, house_prediction, model_description
 
-    ### 🔍 How to Use:
-    - Use the **Sidebar** on the left to navigate to:
-        - **Appartment Price Prediction**
-        - **House Price Prediction**
-        - **Model Description**
-    """
+# ==============================
+# 2. Sidebar Navigation
+# ==============================
+st.sidebar.title("Navigation")
+selected_page = st.sidebar.radio(
+    "Go to",
+    ["Home", "Apartment Prediction", "House Prediction", "Model Description"]
 )
 
 # ==============================
-# 3. Visual Highlights (Optional)
+# 3. Page Content Logic
 # ==============================
-st.markdown("---")
-st.markdown("### 📊 **Quick Insights**")
+if selected_page == "Home":
+    st.title("🏠 Welcome to Property Price Prediction")
+    st.markdown(
+        """
+        Welcome to the **Property Price Prediction App**!  
+        This app uses advanced **Machine Learning Models** to predict property prices for:
+        - **Apartments**
+        - **Houses**
 
-col1, col2 = st.columns(2)
+        ### 🔍 How to Use:
+        - Use the **Sidebar** on the left to navigate to:
+            - **Apartment Price Prediction**
+            - **House Price Prediction**
+            - **Model Description**
+        """
+    )
 
-with col1:
-    st.metric(label="🏢 Appartment Model Accuracy (R²)", value="70.78%", delta="Based on MAE: €38,692.80")
-    st.metric(label="🏢 Median Absolute Error (Median AE)", value="€25,947.45")
+elif selected_page == "Apartment Prediction":
+    # Run the apartment prediction page
+    appartment_prediction.run()
 
-with col2:
-    st.metric(label="🏡 House Model Accuracy (R²)", value="73.52%", delta="Based on MAE: €45,213.67")
-    st.metric(label="🏡 Median Absolute Error (Median AE)", value="€31,548.32")
+elif selected_page == "House Prediction":
+    house_prediction.run()
+
+elif selected_page == "Model Description":
+    model_description.run()
 
 # ==============================
-# 4. Add a Footer
+# 4. Footer
 # ==============================
 st.markdown("---")
 st.markdown(
     """
-    ---
     <div style="text-align: center;">
         <p><strong>About this project:</strong> Developed as part of the **AI & Data Science Course** at BeCode, Ghent.</p>
         <p>Developed by <a href="https://www.linkedin.com/in/ursoncallens" target="_blank">Urson Callens</a> | <a href="https://github.com/ursonc" target="_blank">GitHub</a></p>

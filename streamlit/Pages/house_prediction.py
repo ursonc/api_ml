@@ -5,6 +5,9 @@ import joblib
 import json
 import os
 
+def run():
+    pass
+
 # ==============================
 # 1. Set Page Configuration
 # ==============================
